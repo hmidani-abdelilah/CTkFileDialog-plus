@@ -29,15 +29,15 @@
 ```bash
 
 # Using bash 
-git clone https://github.com/SelfDreamer/CTkFileDialog
-cd CTkFileDialog
+git clone https://github.com/hmidani-abdelilah/CTkFileDialog-plus
+cd CTkFileDialog-plus
 python3 -m venv .venv
 source .venv/bin/activate
 pip3 install -r requirements.txt
 
 # On Windows 
-git clone https://github.com/SelfDreamer/CTkFileDialog 
-cd CTkFileDialog
+git clone https://github.com/hmidani-abdelilah/CTkFileDialog-plus 
+cd CTkFileDialog-plus
 python3 -m venv .venv 
 .\.venv\Scripts\activate.ps1 # In Powershell
 pip3 install -r requirements.txt 
@@ -46,7 +46,7 @@ pip3 install -r requirements.txt
 
 python3 -m venv .venv 
 source .venv/bin/activate # In powershell -> .\.venv\Scripts\activate.ps1
-pip3 install CTkFileDialog 
+pip3 install CTkFileDialog-plus
 
 ```
 
@@ -218,13 +218,13 @@ app.mainloop()
 ## 🌙 Dark Mode Preview
 
 <p align="center">
-  <img src="https://raw.githubusercontent.com/SelfDreamer/CTkFileDialog/refs/heads/main/Images/NormalDialogDark.png" width="80%">
+  <img src="https://raw.githubusercontent.com/hmidani-abdelilah/CTkFileDialog-plus/refs/heads/main/Images/NormalDialogDark.png" width="80%">
 </p>
 
 ## ☀️ Light Mode Preview
 
 <p align="center">
-  <img src="https://raw.githubusercontent.com/SelfDreamer/CTkFileDialog/refs/heads/main/Images/NormalDialogLight.png" width="80%">
+  <img src="https://raw.githubusercontent.com/hmidani-abdelilah/CTkFileDialog-plus/refs/heads/main/Images/NormalDialogLight.png" width="80%">
 </p>
 
 ---
@@ -306,28 +306,13 @@ This is a parameter of the file dialog, but it's more powerful than the default 
 ## 🌙 Dark Mode Preview
 
 <p align="center">
-  <img src="https://raw.githubusercontent.com/SelfDreamer/CTkFileDialog/refs/heads/main/Images/MiniDialogDark.png" width="80%">
+  <img src="https://raw.githubusercontent.com/hmidani-abdelilah/CTkFileDialog-plus/refs/heads/main/Images/MiniDialogDark.png" width="80%">
 </p>
 
 ## ☀️ Light Mode Preview
 
 <p align="center">
-  <img src="https://raw.githubusercontent.com/SelfDreamer/CTkFileDialog/refs/heads/main/Images/MiniDialogLight.png" width="80%">
+  <img src="https://raw.githubusercontent.com/hmidani-abdelilah/CTkFileDialog-plus/refs/heads/main/Images/MiniDialogLight.png" width="80%">
 </p>
 
-The mini design wasn't created by me; it was created by this [user](https://github.com/limafresh), and all credit goes to him. I also want to thank him for creating that design in advance.
-
----
-
-## 👨‍💻 Under Development
-
-This tool is actively under development.  
-If you have any ideas, bugs, or requests — feel free to contribute!
-
----
-
-## 🔗 Repository
-
-👉 [GitHub Repo](https://github.com/SelfDreamer/CTkFileDialog)
-
-<h2 align="center"> This tool is under development, I hope you like it! </h2>
+The mini design  created by [user] (https://github.com/limafresh), and the default design created by [user] (https://github.com/SelfDreamer) and all credit goes to them. I also want to thank them for creating that design in advance.
