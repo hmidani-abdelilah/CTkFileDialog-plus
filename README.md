@@ -315,4 +315,10 @@ This is a parameter of the file dialog, but it's more powerful than the default 
   <img src="https://raw.githubusercontent.com/hmidani-abdelilah/CTkFileDialog-plus/refs/heads/main/Images/MiniDialogLight.png" width="80%">
 </p>
 
-The mini design  created by [user] (https://github.com/limafresh), and the default design created by [user] (https://github.com/SelfDreamer) and all credit goes to them. I also want to thank them for creating that design in advance.
+The mini design  created by [user](https://github.com/limafresh), and the default design created by [user](https://github.com/SelfDreamer) and all credit goes to them. I also want to thank them for creating that design in advance.
+
+## I translate the code to English and add this futures: 
+
+- � Search/filter files in real-time
+- 👀 Multiple view modes (Grid and List view in Default dialog)
+- 📊 Sort files by name, date, size, type, or last modified
