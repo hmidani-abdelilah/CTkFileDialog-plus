@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 from .Dialog import _DrawApp, _MiniDialog, Optional, List 
-from typing import Tuple, Literal 
+from typing import Tuple, Literal, TextIO
 from typeguard import typechecked 
 
 @typechecked
@@ -112,7 +112,7 @@ def askopenfilenames(style: Literal['Default', 'Mini'] = 'Default',
                      tool_tip: bool = False,
                      geometry: Tuple[str, str] = ('1320x720', '500x400'),
                      title: str = 'CTkFileDialog',
-                     ) -> tuple[str] | None:
+                     ) -> tuple[str, ...] | None:
     """
     Displays a file dialog for multiple file selection.
 
@@ -326,7 +326,7 @@ def askopenfiles(style: Literal['Default', 'Mini'] = 'Default',
                  geometry: Tuple[str, str] = ('1320x720', '500x400'),
                  title: str = 'CTkFileDialog',
                  **kwargs,
-                  ):
+                  ) -> tuple[TextIO, ...] | None:
     """
     Displays a multi-file open dialog and returns multiple open file objects.
 
