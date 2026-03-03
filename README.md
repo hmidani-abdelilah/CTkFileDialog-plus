@@ -10,6 +10,7 @@
 ## 🚀 Features
 
 - 🔍 Autocomplete in the path entry field (with `Tab`, `Up`, and `Down`)
+- 🧩 Flexible filetype filters: accepts simple extensions **or** tkinter-style `(label, pattern)` tuples (patterns may contain multiple space‑separated globs). Wildcards like `*`/`*.*` are treated as match‑all.
 - � Search/filter files in real-time
 - 🖼️ Live image preview
 - 🎥 Video thumbnail preview
@@ -67,7 +68,18 @@ ctk.set_appearance_mode("Dark")
 ctk.set_default_color_theme("blue")
 
 def open_file():
-    path = askopenfilename(preview_img=True, autocomplete=True)
+    # you can pass simple extensions...
+    # path = askopenfilename(preview_img=True, autocomplete=True)
+    # or tkinter‑style tuples with labels and multiple globs:
+    path = askopenfilename(
+        filetypes=[
+            ("Text files","*.txt"),
+            ("Python","*.py *.pyw"),
+            ("All","*.*"),
+        ],
+        preview_img=True,
+        autocomplete=True,
+    )
     if path:
         result_label.configure(text=f"Selected file:\n{path}")
 
@@ -86,7 +98,6 @@ app.mainloop()
 
 ### 🗂️ Open Multiple Files
 
-
 ```python
 import customtkinter as ctk
 from CTkFileDialog import askopenfilenames
@@ -95,7 +106,11 @@ ctk.set_appearance_mode("Dark")
 ctk.set_default_color_theme("blue")
 
 def open_files():
-    paths = askopenfilenames(preview_img=True, autocomplete=True)
+    paths = askopenfilenames(
+        filetypes=[("Images","*.jpg *.png"), ("All","*.*")],
+        preview_img=True,
+        autocomplete=True,
+    )
     if paths:
         result_label.configure(text="Selected files:\n" + "\n".join(paths))
 
@@ -192,6 +207,68 @@ result_label.pack()
 
 app.mainloop()
 ```
+
+---
+
+### 📂 Open File as Object
+
+```python
+import customtkinter as ctk
+from CTkFileDialog import askopenfile
+
+ctk.set_appearance_mode("Dark")
+ctk.set_default_color_theme("blue")
+
+def open_file_obj():
+    f = askopenfile(mode='rb', 
+                    filetypes=[("Binary","*.bin"), ("All","*.*")])
+    if f:
+        data = f.read()
+        f.close()
+        result_label.configure(text=f"Read {len(data)} bytes from {f.name}")
+
+app = ctk.CTk()
+app.title("askopenfile Demo")
+app.geometry("500x200")
+
+ctk.CTkButton(app, text="Open File Object", command=open_file_obj).pack(pady=20)
+result_label = ctk.CTkLabel(app, text="Waiting for file selection...")
+result_label.pack()
+
+app.mainloop()
+```
+
+---
+
+### 📂 Open Multiple Files as Objects
+
+```python
+import customtkinter as ctk
+from CTkFileDialog import askopenfiles
+
+ctk.set_appearance_mode("Dark")
+ctk.set_default_color_theme("blue")
+
+def open_files_obj():
+    files = askopenfiles(mode='r', filetypes=[("Text","*.txt")])
+    if files:
+        for f in files:
+            content = f.read()
+            f.close()
+            print(f"{f.name}: {len(content)} chars")
+        result_label.configure(text=f"Opened {len(files)} files, see console output.")
+
+app = ctk.CTk()
+app.title("askopenfiles Demo")
+app.geometry("500x200")
+
+ctk.CTkButton(app, text="Open Files Objects", command=open_files_obj).pack(pady=20)
+result_label = ctk.CTkLabel(app, text="Waiting for file selection...")
+result_label.pack()
+
+app.mainloop()
+```
+
 ---
 
 ## 🧩 Parameters
@@ -200,15 +277,16 @@ app.mainloop()
 
 | Parameter       | Description                                                                 |
 |----------------|-----------------------------------------------------------------------------|
+| `filetypes`     | Optional filter list: either `['.txt', '.md']` or `[('Text','*.txt'),('Py','*.py *.pyw'),('All','*.*')]`. Wildcards are normalized internally. |
 | `hidden`        | Show hidden files or directories (`False` by default).                     |
 | `preview_img`   | Enable image preview in the file dialog.                                   |
 | `video_preview` | Show first frame of video files as thumbnail (experimental).               |
 | `autocomplete`  | Enable path autocompletion with `Tab`, `Up`, and `Down`.                   |
 | `initial_dir`   | Set the initial directory when opening the dialog.                         |
-| `tool_tip`   | Enable the tool tip.                         |
-| `style`   | Defines the dialog style, by default it will be 'Default' but you can choose a small one ('Mini')                        |
-| `geometry`   | You define the geometry string in a tuple: Example ('NormalGM', 'MiniGeometry')                        |
-| `title`   | Define the title from the app, default will be "CTkFileDialog"                        |
+| `tool_tip`      | Enable the tool tip.                                                      |
+| `style`         | Defines the dialog style, by default it will be 'Default' but you can choose a small one ('Mini').                        |
+| `geometry`      | You define the geometry string in a tuple: Example ('NormalGM', 'MiniGeometry').                        |
+| `title`         | Define the title from the app, default will be "CTkFileDialog".                        |
 
 
 </div>
@@ -316,9 +394,3 @@ This is a parameter of the file dialog, but it's more powerful than the default 
 </p>
 
 The mini design  created by [user](https://github.com/limafresh), and the default design created by [user](https://github.com/SelfDreamer) and all credit goes to them. I also want to thank them for creating that design in advance.
-
-## I translate the code to English and add this futures: 
-
-- � Search/filter files in real-time
-- 👀 Multiple view modes (Grid and List view in Default dialog)
-- 📊 Sort files by name, date, size, type, or last modified
