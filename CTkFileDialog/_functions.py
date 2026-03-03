@@ -1,11 +1,43 @@
 #!/usr/bin/env python
 from .Dialog import _DrawApp, _MiniDialog, Optional, List 
-from typing import Tuple, Literal, TextIO
+from typing import Tuple, Literal, TextIO, Union
+
+
+def _normalize_filetypes(filetypes: Optional[List[Union[str, Tuple[str, str]]]]) -> Optional[List[str]]:
+    """Convert tkinter‑style filetypes list into simplified extensions.
+
+    * Accepts a list of strings (current behaviour) or a list of
+      ``(label, pattern)`` tuples where pattern may contain one or
+      more space‑separated globs (e.g. ``"*.txt *.md"``).
+    * ``"*"`` or ``"*.*"`` are treated as wildcard and produce an
+      empty string entry which passes every filename.
+    * Removes any leading ``*`` characters so filters like ``"*.py"``
+      become ``".py"`` (the form used internally by ``_DrawApp``).
+    """
+    if not filetypes:
+        return None
+    normalized: list[str] = []
+    for entry in filetypes:
+        if isinstance(entry, (tuple, list)) and len(entry) >= 2:
+            # ignore label (entry[0])
+            patterns = str(entry[1]).split()
+            for pat in patterns:
+                pat = pat.strip()
+                if pat in ("*", "*.*"):
+                    # match everything
+                    normalized.append("")
+                else:
+                    # strip wildcards
+                    pat = pat.lstrip("*")
+                    normalized.append(pat)
+        else:
+            normalized.append(str(entry))
+    return normalized
 from typeguard import typechecked 
 
 @typechecked
 def askopenfilename(style: Literal['Mini', 'Default'] = 'Default',
-                    filetypes: Optional[List[str]] = None,
+                    filetypes: Optional[List[Union[str, Tuple[str, str]]]] = None,
                     hidden: bool = False, 
                     preview_img: bool = False,
                     autocomplete: bool = False,
@@ -22,7 +54,9 @@ def askopenfilename(style: Literal['Mini', 'Default'] = 'Default',
     and select a single file. Various display options can be configured.
 
     Args:
-        filetypes: List of file type filters (e.g., ['.py', 'sh', '.md'])
+        filetypes: List of file type filters (e.g., ['.py', 'sh', '.md']).
+                   You can also supply standard tkinter-style tuples
+                   like [("Text files","*.txt"), ("All","*.*")].
         hidden: If True, shows hidden files/directories
         preview_img: Enables live preview of image files
         autocomplete: Enables path autocompletion in the input field
@@ -37,25 +71,30 @@ def askopenfilename(style: Literal['Mini', 'Default'] = 'Default',
         str: Absolute path to the selected file, or None if canceled
 
     Example:
+        >>> # basic form using plain extensions
+        >>> file_path = askopenfilename(filetypes=[".txt", ".md"])
+        >>> 
+        >>> # or use tkinter-style tuples with labels and glob patterns
         >>> file_path = askopenfilename(
-        ...     filetypes=['.py', '.md', '.jpg', '.mp4', '.mvk'],
-        ...     preview_img=True
+        ...     filetypes=[("Text files", "*.txt"), ("Python files", "*.py *.pyw"), ("All", "*.*")]
         ... )
         >>> print(f"Selected: {file_path}")
     """
+    # normalize filter list so _DrawApp receives simple extensions
+    normalized = _normalize_filetypes(filetypes)
     if style == 'Default':
 
-        app = _DrawApp(filetypes=filetypes, current_path=initial_dir, hidden=hidden, preview_img=preview_img, method='askopenfilename', autocomplete=autocomplete, video_preview=video_preview, tool_tip=tool_tip, geometry=geometry[0], title=title)
+        app = _DrawApp(filetypes=normalized, current_path=initial_dir, hidden=hidden, preview_img=preview_img, method='askopenfilename', autocomplete=autocomplete, video_preview=video_preview, tool_tip=tool_tip, geometry=geometry[0], title=title)
         app.app.wait_window()
         return app.selected_file if app.selected_file else None
     elif style == 'Mini':
-        app = _MiniDialog(method='askopenfilename', filetypes=filetypes, initial_dir=initial_dir, autocomplete=autocomplete, hidden=hidden, geometry=geometry[1], title=title)
+        app = _MiniDialog(method='askopenfilename', filetypes=normalized, initial_dir=initial_dir, autocomplete=autocomplete, hidden=hidden, geometry=geometry[1], title=title)
 
         return app.selected_path 
 
 @typechecked
 def askdirectory(style: Literal['Default', 'Mini'] = 'Default',
-                 filetypes: Optional[List[str]] = None,
+                 filetypes: Optional[List[Union[str, Tuple[str, str]]]] = None,
                  hidden: bool = False, 
                  autocomplete: bool = False,
                  initial_dir: str =  '.',
@@ -72,7 +111,8 @@ def askdirectory(style: Literal['Default', 'Mini'] = 'Default',
     Args:
 
         style: You define the dialog style. There are two styles: the default one and a small one. (Default, Mini)
-        filetypes: Optional file type filters (affects display in some implementations)
+        filetypes: Optional file type filters (affects display in some implementations).
+                   Tuple syntax described above is accepted.
         hidden: Enables showing hidden directories when True
         autocomplete: Enables path autocompletion feature
         initial_dir: Starting directory (defaults to current working directory)
@@ -88,22 +128,25 @@ def askdirectory(style: Literal['Default', 'Mini'] = 'Default',
         ...     initial_dir="~/Documents",
         ...     hidden=True
         ... )
+        >>> # filetypes are ignored for directories but may still be passed
+        >>> dir_path = askdirectory(filetypes=[("All","*.*")])
         >>> if dir_path:
         ...     print(f"Chose directory: {dir_path}")
     """
+    normalized = _normalize_filetypes(filetypes)
     if style == 'Default':
 
-        app = _DrawApp(filetypes=filetypes, current_path=initial_dir, hidden=hidden, method='askdirectory', autocomplete=autocomplete, tool_tip=tool_tip, geometry=geometry[0], title=title)
+        app = _DrawApp(filetypes=normalized, current_path=initial_dir, hidden=hidden, method='askdirectory', autocomplete=autocomplete, tool_tip=tool_tip, geometry=geometry[0], title=title)
         app.app.wait_window()
         return app.selected_file if app.selected_file else None
 
     elif style == 'Mini': 
-        app = _MiniDialog(filetypes=filetypes, initial_dir=initial_dir, hidden=hidden, method='askdirectory', autocomplete=autocomplete, title=title, geometry=geometry[1])
+        app = _MiniDialog(filetypes=normalized, initial_dir=initial_dir, hidden=hidden, method='askdirectory', autocomplete=autocomplete, title=title, geometry=geometry[1])
         return app.selected_path if app.selected_path else None
 
 @typechecked
 def askopenfilenames(style: Literal['Default', 'Mini'] = 'Default',
-                     filetypes: Optional[List[str]] = None,
+                     filetypes: Optional[List[Union[str, Tuple[str, str]]]] = None,
                      hidden: bool = False, 
                      preview_img: bool = False,
                      autocomplete: bool = False,
@@ -122,7 +165,8 @@ def askopenfilenames(style: Literal['Default', 'Mini'] = 'Default',
     Args:
 
         style: You define the dialog style. There are two styles: the default one and a small one. (Default, Mini)
-        filetypes: File type filters (e.g., [("Images", "*.jpg *.png")])
+        filetypes: File type filters (e.g., [("Images", "*.jpg *.png")]).
+                   Tkinter-style tuple lists are accepted as well.
         hidden: Shows hidden files when enabled
         preview_img: Enables image preview functionality
         autocomplete: Activates path autocompletion
@@ -133,29 +177,32 @@ def askopenfilenames(style: Literal['Default', 'Mini'] = 'Default',
         title: Define the title from the app, default will be "CTkFileDialog"
 
     Returns:
-        tuple[str]: Tuple of selected file paths, or None if canceled
+        tuple[str, ...]: Tuple of selected file paths, or None if canceled
 
     Example:
+        >>> # wildcard tuple example
         >>> selected_files = askopenfilenames(
-        ...     filetypes=['.py', '.md'],
+        ...     filetypes=[("Text files", "*.txt"), ("All files", "*.*")],
         ...     preview_img=True
         ... )
-        >>> for file in selected_files:
-        ...     process_file(file)
+        >>> if selected_files:
+        ...     for file in selected_files:
+        ...         process_file(file)
     """
 
+    normalized = _normalize_filetypes(filetypes)
     if style == 'Default':
-        app = _DrawApp(filetypes=filetypes, current_path=initial_dir, hidden=hidden, preview_img=preview_img, method='askopenfilenames', autocomplete=autocomplete, video_preview=video_preview, tool_tip=tool_tip, geometry=geometry[0], title=title)
+        app = _DrawApp(filetypes=normalized, current_path=initial_dir, hidden=hidden, preview_img=preview_img, method='askopenfilenames', autocomplete=autocomplete, video_preview=video_preview, tool_tip=tool_tip, geometry=geometry[0], title=title)
         app.app.wait_window()
         return tuple(app.selected_objects) if app.selected_objects else None
     elif style == 'Mini': 
-        app = _MiniDialog(filetypes=filetypes, initial_dir=initial_dir, hidden=hidden, method='askopenfilenames', autocomplete=autocomplete, geometry=geometry[1], title=title)
+        app = _MiniDialog(filetypes=normalized, initial_dir=initial_dir, hidden=hidden, method='askopenfilenames', autocomplete=autocomplete, geometry=geometry[1], title=title)
 
         return tuple(app.selected_paths) if app.selected_paths else None
 
 @typechecked
 def asksaveasfilename(style: Literal['Default', 'Mini'] = 'Default',
-                      filetypes: Optional[List[str]] = None,
+                      filetypes: Optional[List[Union[str, Tuple[str, str]]]] = None,
                       hidden: bool = False, 
                       preview_img: bool = False,
                       autocomplete: bool = False,
@@ -174,7 +221,8 @@ def asksaveasfilename(style: Literal['Default', 'Mini'] = 'Default',
     Args:
 
         style: You define the dialog style. There are two styles: the default one and a small one. (Default, Mini)
-        filetypes: Suggested file extensions (e.g., ['.pdf', '.jpg'])
+        filetypes: Suggested file extensions (e.g., ['.pdf', '.jpg']).
+                   Tuple syntax like [("PDF","*.pdf")] is also allowed.
         hidden: Shows hidden items when enabled
         preview_img: Enables preview of existing images
         autocomplete: Activates path suggestion
@@ -188,29 +236,36 @@ def asksaveasfilename(style: Literal['Default', 'Mini'] = 'Default',
         str: Path where file should be saved, or None if canceled
 
     Example:
+        >>> # simple extension list
         >>> save_path = asksaveasfilename(
         ...     filetypes=['.txt', '.md'],
         ...     initial_dir="~/Documents"
+        ... )
+        >>> 
+        >>> # tuple-style filter with label
+        >>> save_path = asksaveasfilename(
+        ...     filetypes=[("Text files","*.txt")]
         ... )
         >>> if save_path:
         ...     with open(save_path, 'w') as f:
         ...         f.write("File content")
     """
+    normalized = _normalize_filetypes(filetypes)
     if style == 'Default':
 
-        app = _DrawApp(filetypes=filetypes, current_path=initial_dir, hidden=hidden, preview_img=preview_img, method='asksaveasfilename', autocomplete=autocomplete, video_preview=video_preview, tool_tip=tool_tip, geometry=geometry[0], title=title)
+        app = _DrawApp(filetypes=normalized, current_path=initial_dir, hidden=hidden, preview_img=preview_img, method='asksaveasfilename', autocomplete=autocomplete, video_preview=video_preview, tool_tip=tool_tip, geometry=geometry[0], title=title)
         app.app.wait_window()
         return app.selected_file if app.selected_file else None
     elif style == 'Mini':
 
-        app = _MiniDialog(filetypes=filetypes, initial_dir=initial_dir, hidden=hidden, method='asksaveasfilename', autocomplete=autocomplete, geometry=geometry[1], title=title)
+        app = _MiniDialog(filetypes=normalized, initial_dir=initial_dir, hidden=hidden, method='asksaveasfilename', autocomplete=autocomplete, geometry=geometry[1], title=title)
         
         return app.selected_path if app.selected_path else None
 
 @typechecked
 def asksaveasfile(style: Literal['Default', 'Mini'] = 'Default',
                   mode: Literal['r', 'rb', 'r+', 'rb+', 'r+b','w', 'wb', 'w+', 'wb+','a', 'ab', 'a+', 'ab+','x', 'xb'] = 'w',
-                  filetypes: Optional[List[str]] = None,
+                  filetypes: Optional[List[Union[str, Tuple[str, str]]]] = None,
                   hidden: bool = False, 
                   preview_img: bool = False,
                   autocomplete: bool = False,
@@ -220,7 +275,7 @@ def asksaveasfile(style: Literal['Default', 'Mini'] = 'Default',
                   geometry: Tuple[str, str] = ('1320x720', '500x400'),
                   title: str = 'CTkFileDialog',
                   **kwargs,
-                  ):
+                  ) -> TextIO | None:
     """
     Displays a save dialog and returns an open file object.
 
@@ -243,27 +298,29 @@ def asksaveasfile(style: Literal['Default', 'Mini'] = 'Default',
         **kwargs: Additional arguments passed to open()
 
     Returns:
-        TextIOWrapper: Open file object in write mode, or None if canceled
+        TextIO: Open file object in the specified mode, or None if canceled
 
     Example:
-        >>> with asksaveasfile(mode='w', filetypes=['.jpeg', 'jpg', 'mp4'] as f:
-        ...     if f:  # Check if not canceled
-        ...         f.write("Log entry\\n")
+        >>> f = asksaveasfile(mode='w', filetypes=['.jpeg', '.jpg', '.mp4'])
+        >>> if f:  # Check if not canceled
+        ...     f.write("Log entry\\n")
+        ...     f.close()
     """
+    normalized = _normalize_filetypes(filetypes)
     if style == 'Default':
-        app = _DrawApp(filetypes=filetypes, current_path=initial_dir, hidden=hidden, preview_img=preview_img, method='asksaveasfile', autocomplete=autocomplete, video_preview=video_preview, tool_tip=tool_tip, geometry=geometry[0], title=title)
+        app = _DrawApp(filetypes=normalized, current_path=initial_dir, hidden=hidden, preview_img=preview_img, method='asksaveasfile', autocomplete=autocomplete, video_preview=video_preview, tool_tip=tool_tip, geometry=geometry[0], title=title)
         app.app.wait_window()
     
         return open(app.selected_file, mode=mode, **kwargs) if app.selected_file else None
     elif style == 'Mini':
-        app = _MiniDialog(filetypes=filetypes, initial_dir=initial_dir, hidden=hidden, method='asksaveasfile', geometry=geometry[1], title=title)
+        app = _MiniDialog(filetypes=normalized, initial_dir=initial_dir, hidden=hidden, method='asksaveasfile', geometry=geometry[1], title=title)
         return open(app.selected_path, mode=mode, **kwargs) if app.selected_path else None
 
 @typechecked
 def askopenfile(style: Literal['Mini', 'Default'] = 'Default', 
                 mode: Literal['r', 'rb', 'r+', 'rb+', 'r+b','w', 'wb', 'w+', 'wb+','a', 'ab', 'a+', 'ab+','x', 'xb'] = 'r',
                 hidden: bool = False,
-                filetypes: Optional[List[str]] = None,
+                filetypes: Optional[List[Union[str, Tuple[str, str]]]] = None,
                 preview_img: bool = False,
                 autocomplete: bool = False,
                 video_preview: bool = False,
@@ -272,7 +329,7 @@ def askopenfile(style: Literal['Mini', 'Default'] = 'Default',
                 geometry: Tuple[str, str] = ('1320x720', '500x400'),
                 title: str = 'CTkFileDialog',
                 **kwargs,
-                ):
+                ) -> TextIO | None:
     """
     Displays an open file dialog and returns an open file object.
 
@@ -284,7 +341,7 @@ def askopenfile(style: Literal['Mini', 'Default'] = 'Default',
         style: You define the dialog style. There are two styles: the default one and a small one. (Default, Mini)
         mode: File opening mode (defaults to 'r' for read)
         hidden: Shows hidden files when enabled
-        filetypes: File type filters
+        filetypes: File type filters (tuple syntax accepted, e.g. [("Text","*.txt")])
         preview_img: Enables image preview
         autocomplete: Activates path completion
         video_preview: Enables video preview
@@ -298,18 +355,19 @@ def askopenfile(style: Literal['Mini', 'Default'] = 'Default',
         TextIOWrapper: Open file object, or None if canceled
 
     Example:
-        >>> f = askopenfile(mode='rb', filetypes=[".bin"])
+        >>> f = askopenfile(mode='rb', filetypes=[("Binary","*.bin")])
         >>> if f:
         ...     data = f.read()
         ...     f.close()
     """
+    normalized = _normalize_filetypes(filetypes)
     if style == 'Default':
-        app = _DrawApp(filetypes=filetypes, current_path=initial_dir, hidden=hidden, preview_img=preview_img, method='askopenfile', autocomplete=autocomplete, video_preview=video_preview, tool_tip=tool_tip, geometry=geometry[0], title=title)
+        app = _DrawApp(filetypes=normalized, current_path=initial_dir, hidden=hidden, preview_img=preview_img, method='askopenfile', autocomplete=autocomplete, video_preview=video_preview, tool_tip=tool_tip, geometry=geometry[0], title=title)
         app.app.wait_window()
     
         return open(app.selected_file, mode=mode, **kwargs) if app.selected_file else None
     elif style == 'Mini':
-        app = _MiniDialog(filetypes=filetypes, initial_dir=initial_dir, hidden=hidden, method='asksaveasfile', autocomplete=autocomplete, _extra_method='askopenfile', geometry=geometry[1], title=title)
+        app = _MiniDialog(filetypes=normalized, initial_dir=initial_dir, hidden=hidden, method='asksaveasfile', autocomplete=autocomplete, _extra_method='askopenfile', geometry=geometry[1], title=title)
 
         return open(app.selected_path, mode=mode, **kwargs) if app.selected_path else None
 
@@ -317,7 +375,7 @@ def askopenfile(style: Literal['Mini', 'Default'] = 'Default',
 def askopenfiles(style: Literal['Default', 'Mini'] = 'Default',
                  mode: Literal['r', 'rb', 'r+', 'rb+', 'r+b','w', 'wb', 'w+', 'wb+','a', 'ab', 'a+', 'ab+','x', 'xb'] = 'r',
                  hidden: bool = False,
-                 filetypes: Optional[List[str]] = None,
+                 filetypes: Optional[List[Union[str, Tuple[str, str]]]] = None,
                  preview_img: bool = False,
                  autocomplete: bool = False,
                  video_preview: bool = False,
@@ -338,7 +396,7 @@ def askopenfiles(style: Literal['Default', 'Mini'] = 'Default',
         style: You define the dialog style. There are two styles: the default one and a small one. (Default, Mini)
         mode: File opening mode for all files (default 'r')
         hidden: Shows hidden files when True
-        filetypes: File extension filters
+        filetypes: File extension filters (tuple syntax accepted)
         preview_img: Enables image preview
         autocomplete: Activates path completion
         video_preview: Enables video preview
@@ -352,20 +410,21 @@ def askopenfiles(style: Literal['Default', 'Mini'] = 'Default',
         tuple[TextIOWrapper]: Tuple of open file objects, or None if canceled
 
     Example:
-        >>> files = askopenfiles(mode='r', filetypes=[".txt")])
+        >>> files = askopenfiles(mode='r', filetypes=[("Text","*.txt")])
         >>> if files:
         ...     for f in files:
         ...         print(f.read())
         ...         f.close()
     """
+    normalized = _normalize_filetypes(filetypes)
     if style == 'Default': 
-        app = _DrawApp(filetypes=filetypes, current_path=initial_dir, hidden=hidden, preview_img=preview_img, method='askopenfilenames', autocomplete=autocomplete, video_preview=video_preview, tool_tip=tool_tip, geometry=geometry[0], title=title)
+        app = _DrawApp(filetypes=normalized, current_path=initial_dir, hidden=hidden, preview_img=preview_img, method='askopenfilenames', autocomplete=autocomplete, video_preview=video_preview, tool_tip=tool_tip, geometry=geometry[0], title=title)
         app.app.wait_window()
     
         return tuple(open(f, mode=mode, **kwargs) for f in app.selected_objects) if app.selected_objects else None
 
     elif style == 'Mini':
 
-        app = _MiniDialog(filetypes=filetypes, initial_dir=initial_dir, hidden=hidden, autocomplete=autocomplete, method='askopenfilenames', geometry=geometry[1], title=title)
+        app = _MiniDialog(filetypes=normalized, initial_dir=initial_dir, hidden=hidden, autocomplete=autocomplete, method='askopenfilenames', geometry=geometry[1], title=title)
 
         return tuple(open(f, mode=mode, **kwargs) for f in app.selected_paths) if app.selected_paths else None
