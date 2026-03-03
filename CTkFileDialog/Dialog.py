@@ -500,37 +500,54 @@ class _DrawApp():
 
 
     def event_scroll(self):
-        
+        """Bind mouse-wheel events so file list scrolls in Default dialog.
+
+        Previous code attached handlers to the internal canvas only which
+        meant wheel rotation would sometimes be ignored (especially when
+        focus was on another widget).  On X11 ``<MouseWheel>`` may not
+        fire at all, so we also listen for ``<Button-4>``/``<Button-5>``.
+        The handler performs a hit-test to ensure scrolling only occurs
+        when the pointer is above the scrollable area.
+        """
+
         canvas = self.CenterSideFrame._parent_canvas
 
         def _on_mousewheel(event):
             try:
-                x_root, y_root = event.x_root, event.y_root
+                # only scroll when pointer is over the frame
+                x_root = getattr(event, 'x_root', None)
+                y_root = getattr(event, 'y_root', None)
+                if x_root is not None and y_root is not None:
+                    x1 = self.CenterSideFrame.winfo_rootx()
+                    y1 = self.CenterSideFrame.winfo_rooty()
+                    x2 = x1 + self.CenterSideFrame.winfo_width()
+                    y2 = y1 + self.CenterSideFrame.winfo_height()
+                    if not (x1 <= x_root <= x2 and y1 <= y_root <= y2):
+                        return
 
-                # Coordinates and size of the scrollable frame
-                x1 = self.CenterSideFrame.winfo_rootx()
-                y1 = self.CenterSideFrame.winfo_rooty()
-                x2 = x1 + self.CenterSideFrame.winfo_width()
-                y2 = y1 + self.CenterSideFrame.winfo_height()
-                if x1 <= x_root <= x2 and y1 <= y_root <= y2:
-
-                    if event.num == 4: 
+                # handle scroll events from different platforms
+                if hasattr(event, 'num'):
+                    if event.num == 4:
                         canvas.yview_scroll(-1, "units")
-                    elif event.num == 5:  
+                        self._check_scroll(self.app)
+                        return "break"
+                    elif event.num == 5:
                         canvas.yview_scroll(1, "units")
-                    else:  
-                        canvas.yview_scroll(-int(event.delta / 120), "units")
-                    
-                    # Trigger lazy loading check
+                        self._check_scroll(self.app)
+                        return "break"
+
+                if hasattr(event, 'delta'):
+                    canvas.yview_scroll(-int(event.delta / 120), "units")
                     self._check_scroll(self.app)
                     return "break"
-            except Exception as e:
+            except Exception:
                 pass
 
-        canvas.bind_all("<MouseWheel>", _on_mousewheel)
-        canvas.bind("<Button-4>", _on_mousewheel)
-        canvas.bind("<Button-5>", _on_mousewheel)
-        canvas.bind("<MouseWheel>", _on_mousewheel)
+        # bind to the top–level window so scrolling works regardless of
+        # focus or which child widget generated the event
+        self.app.bind_all("<MouseWheel>", _on_mousewheel)
+        self.app.bind_all("<Button-4>", _on_mousewheel)
+        self.app.bind_all("<Button-5>", _on_mousewheel)
 
         # Bind to all child widgets
         for widget in canvas.winfo_children():
