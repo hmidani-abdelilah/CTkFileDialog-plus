@@ -22,7 +22,7 @@ Author: Flick
 Repository: https://github.com/FlickGMD/CTkFileDialog
 """
 
-from .constants import PWD, HOME, PATH, TEMP, CONFIG_DIR, CACHE_DIR, DATA_DIR, VENV, PATHS
+from .constants import PWD, HOME, PATH, TEMP, CONFIG_DIR, CACHE_DIR, DATA_DIR, VENV, PATHS ,DOWNLOAD_DIR, DOWNLOAD_DIR_VIDEO
 
 __all__ = [
         'PWD',
@@ -34,4 +34,6 @@ __all__ = [
         'DATA_DIR',
         'VENV',
         'PATHS',
+        'DOWNLOAD_DIR',
+        'DOWNLOAD_DIR_VIDEO',
         ]

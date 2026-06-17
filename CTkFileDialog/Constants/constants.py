@@ -8,6 +8,8 @@ PWD = str(Path.cwd())
 # User's home directory (e.g., /home/user or C:\Users\user)
 HOME = str(Path.home())
 
+
+
 # System PATH split into a list of directories
 PATH = os.getenv('PATH').split(os.pathsep)
 
@@ -26,6 +28,16 @@ DATA_DIR = os.getenv('XDG_DATA_HOME', str(Path(HOME) / '.local' / 'share'))
 # Active Python virtual environment (venv or conda), fallback to PWD 
 VENV = os.getenv("VIRTUAL_ENV") or os.getenv("CONDA_PREFIX") or PWD
 
+# Download directory windows and linux (default: ~/Downloads)
+DOWNLOAD_DIR = str(Path(HOME) / 'Downloads')
+
+# Download directory Video windows and linux  (default: ~/Downloads/Video )
+DOWNLOAD_DIR_VIDEO = str(Path(DOWNLOAD_DIR) / 'Video')
+# create the directory if it doesn't exist
+if not os.path.exists(DOWNLOAD_DIR_VIDEO):
+    os.makedirs(DOWNLOAD_DIR_VIDEO)
+
+
 # All paths in a single dictionary for easy access
 PATHS = {
     "HOME": HOME,
@@ -35,5 +47,7 @@ PATHS = {
     "DATA_DIR": DATA_DIR,
     "CACHE_DIR": CACHE_DIR,
     "PATH": PATH, 
-    'VENV': VENV
+    'VENV': VENV,
+    'DOWNLOAD_DIR': DOWNLOAD_DIR,
+    'DOWNLOAD_DIR_VIDEO': DOWNLOAD_DIR_VIDEO
 }
