@@ -371,8 +371,8 @@ root.mainloop()
 | `PATH`   | System PATH split into a list of directories                         |
 | `DATA_DIR`   | XDG-compliant user data directory (default: ~/.local/share)                        |
 | `VENV`   | Active Python virtual environment (venv or conda), fallback to PWD                        |
-| `DOWNLOAD_DIR` | Default download directory (e.g., ~/Downloads). |
-| `DOWNLOAD_DIR_VIDEO` | Default video download directory (e.g., ~/Downloads/Video).|
+| `DOWNLOAD_DIR` | Default download directory (e.g., ~/Downloads or C:\Users\user\Download). |
+| `DOWNLOAD_DIR_VIDEO` | Default video download directory (e.g., ~/Downloads/Video or C:\Users\user\Download\Video).|
 
 
 </div>
