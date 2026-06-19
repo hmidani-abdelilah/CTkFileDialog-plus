@@ -17,9 +17,15 @@ Available constants:
 - DATA_DIR:   XDG-compliant user data directory (e.g., ~/.local/share).
 - PATH:       List of directories in the system PATH environment variable.
 - VENV:       Path to the active Python virtual environment (VIRTUAL_ENV or CONDA_PREFIX).
+- DOWNLOAD_DIR: Default download directory (e.g., ~/Downloads).
+- DOWNLOAD_DIR_VIDEO: Default video download directory (e.g., ~/Downloads/Video).
 
 Author: Flick
 Repository: https://github.com/FlickGMD/CTkFileDialog
+
+Modified: by abdelilah 
+https://github.com/hmidani-abdelilah/CTkFileDialog-plus
+
 """
 
 from .constants import PWD, HOME, PATH, TEMP, CONFIG_DIR, CACHE_DIR, DATA_DIR, VENV, PATHS ,DOWNLOAD_DIR, DOWNLOAD_DIR_VIDEO
