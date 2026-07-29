@@ -59,9 +59,11 @@ class _DrawApp():
                  autocomplete: bool = False,
                  video_preview: bool = False,
                  tool_tip: bool = False,
+                 foldercreation: bool = True,
                  title: str = 'CTkFileDialog',
                  geometry: str = '1320x720') -> None:
         
+        self.foldercreation = foldercreation
         self.current_path = current_path
 
         if not self.current_path: 
@@ -203,7 +205,7 @@ class _DrawApp():
             
             # If it's a directory
             if os.path.isdir(path):
-                if self.method == 'askdirectory':
+                if self.method in ('askdirectory', 'askopenpathname'):
                     self._temp_item = path
                 self.current_path = Path(path)
                 self.update_entry(path=self.current_path)
@@ -284,8 +286,48 @@ class _DrawApp():
                 ]
                 
                 return
+
+            if self.method == "askdirectories":
+                seen = set()
+                self.selected_objects = [
+                    f for f in self._temp_items
+                    if os.path.isdir(f) and f not in seen and not seen.add(f)
+                ]
+                return
+
+            if self.method == "askopenpathnames":
+                seen = set()
+                self.selected_objects = [
+                    f for f in self._temp_items
+                    if f not in seen and not seen.add(f)
+                ]
+                return
             
     
+    def _create_new_folder(self):
+        if not self.foldercreation:
+            return
+        dialog = ctk.CTkInputDialog(text='Enter new folder name:', title='New Folder')
+        name = dialog.get_input()
+        if not name:
+            return
+        name = name.strip()
+        if not name:
+            return
+        new_path = os.path.join(str(self.current_path), name)
+        try:
+            os.makedirs(new_path, exist_ok=False)
+        except FileExistsError:
+            CTkMessagebox(message='A file or folder with that name already exists!', title='Error', icon='cancel')
+            return
+        except PermissionError:
+            CTkMessagebox(message='Permission denied!', title='Error', icon='cancel')
+            return
+        except OSError as e:
+            CTkMessagebox(message=f'Could not create folder: {e}', title='Error', icon='cancel')
+            return
+        self._list_files(master=self.app)
+
     @staticmethod
     def _is_video(video: str):
 
@@ -361,6 +403,11 @@ class _DrawApp():
         # Ok button
         ButtonOk = ctk.CTkButton(master=TopBar, text='Ok', font=('Hack Nerd Font', 15), width=70, command = lambda: self.close_app())
         ButtonOk.pack(side='left', fill='x', padx=10, pady=10)
+
+        # New folder button
+        if self.foldercreation:
+            ButtonNewFolder = ctk.CTkButton(master=TopBar, text='New Folder', font=('Hack Nerd Font', 15), width=100, command=self._create_new_folder)
+            ButtonNewFolder.pack(side='left', fill='x', padx=10, pady=10)
 
         if self.autocomplete:
             
@@ -583,7 +630,7 @@ class _DrawApp():
 
         if event.state & 0x0004:
 
-            if self.method in  ['askopenfilenames', 'askopenfiles']:
+            if self.method in  ['askopenfilenames', 'askopenfiles', 'askdirectories', 'askopenpathnames']:
                 if r not in self._temp_items: 
                     self._temp_items.append(r)
                 boton.configure(fg_color="blue")
@@ -595,7 +642,7 @@ class _DrawApp():
 
         else:
             self._temp_items.clear()
-            if self.method in ['askopenfilenames', 'askopenfiles']:
+            if self.method in ['askopenfilenames', 'askopenfiles', 'askdirectories', 'askopenpathnames']:
                 self._temp_items.append(r)
 
             for btn in self._all_buttons:
@@ -643,7 +690,7 @@ class _DrawApp():
             file = self.files[self.LOADED]
             full_path = os.path.join(path, file)
 
-            if self.method == 'askdirectory' and os.path.isfile(full_path):
+            if self.method in ('askdirectory', 'askdirectories') and os.path.isfile(full_path):
                 self.LOADED += 1
                 continue
 
@@ -673,7 +720,7 @@ class _DrawApp():
             fixed_name = self.fix_name(name=file)
 
             command = None
-            if self.method not in ['askopenfilenames']:
+            if self.method not in ['askopenfilenames', 'askdirectories', 'askopenpathnames']:
                 command = lambda r=full_path: self.navigate_to(path=r, master=master)
         
             boton = ctk.CTkButton(
@@ -692,7 +739,7 @@ class _DrawApp():
 
             if self.tool_tip:
                 _CustomToolTip(widget=boton, message=self._get_info(full_path))
-            if self.method in ['askopenfilenames', 'askopenfiles']:
+            if self.method in ['askopenfilenames', 'askopenfiles', 'askdirectories', 'askopenpathnames']:
                 boton.bind('<Button-1>', lambda event, r=full_path, b=boton: self._handle_click(event, r, master, b))
             boton.grid(row=row, column=col, padx=10, pady=10)
             col += 1
@@ -820,7 +867,7 @@ class _DrawApp():
         while self.LOADED < len(self.display_files) and cantidad > 0:
             file = self.display_files[self.LOADED]
             
-            if self.method == 'askdirectory' and os.path.isfile(os.path.join(self.current_path, file)):
+            if self.method in ('askdirectory', 'askdirectories') and os.path.isfile(os.path.join(self.current_path, file)):
                 self.LOADED += 1
                 continue
             
@@ -852,7 +899,7 @@ class _DrawApp():
             fixed_name = self.fix_name(name=file)
             
             command = None
-            if self.method not in ['askopenfilenames']:
+            if self.method not in ['askopenfilenames', 'askdirectories', 'askopenpathnames']:
                 command = lambda r=full_path: self.navigate_to(path=r, master=self.app)
             
             row = self.LOADED // columnas
@@ -874,7 +921,7 @@ class _DrawApp():
             
             if self.tool_tip:
                 _CustomToolTip(widget=boton, message=self._get_info(full_path))
-            if self.method in ['askopenfilenames', 'askopenfiles']:
+            if self.method in ['askopenfilenames', 'askopenfiles', 'askdirectories', 'askopenpathnames']:
                 boton.bind('<Button-1>', lambda event, r=full_path, b=boton: self._handle_click(event, r, self.app, b))
             boton.grid(row=row, column=col, padx=10, pady=10)
             
@@ -942,7 +989,7 @@ class _DrawApp():
         while self.LOADED < len(self.display_files) and cantidad > 0:
             file = self.display_files[self.LOADED]
             
-            if self.method == 'askdirectory' and os.path.isfile(os.path.join(self.current_path, file)):
+            if self.method in ('askdirectory', 'askdirectories') and os.path.isfile(os.path.join(self.current_path, file)):
                 self.LOADED += 1
                 continue
             
@@ -988,7 +1035,7 @@ class _DrawApp():
             info_text = f"{file}\n{file_type} • {size_str} • {mod_time}"
             
             command = None
-            if self.method not in ['askopenfilenames']:
+            if self.method not in ['askopenfilenames', 'askdirectories', 'askopenpathnames']:
                 command = lambda r=full_path: self.navigate_to(path=r, master=self.app)
             
             boton = ctk.CTkButton(
@@ -1004,7 +1051,7 @@ class _DrawApp():
             )
             boton.pack(expand=True, fill="both", side="left")
             
-            if self.method in ['askopenfilenames', 'askopenfiles']:
+            if self.method in ['askopenfilenames', 'askopenfiles', 'askdirectories', 'askopenpathnames']:
                 boton.bind('<Button-1>', lambda event, r=full_path, b=boton: self._handle_click(event, r, self.app, b))
             
             self.LOADED += 1
@@ -1032,7 +1079,7 @@ class _DrawApp():
         self.files = [
             f.name for f in os.scandir(path)
             if (
-                (f.is_dir() or (self.method != 'askdirectory' and f.is_file())) and
+                (f.is_dir() or (self.method not in ('askdirectory', 'askdirectories') and f.is_file())) and
                 (self.hidden or not f.name.startswith('.')) and
                 (f.is_dir() or not self.filetypes or
                  any(f.name.endswith(ext) for ext in self.filetypes))
@@ -1063,6 +1110,7 @@ class _MiniDialog():
                  autocomplete: bool = False,
                  initial_dir: str = '.',
                  _extra_method: str = '',
+                 foldercreation: bool = True,
                  geometry: str = '500x400',
                  title: str = 'CTkFileDialog'):
         
@@ -1070,6 +1118,7 @@ class _MiniDialog():
         self.master.geometry(geometry_string=geometry)
         self.master.title(title)
         self._extra_method = _extra_method
+        self.foldercreation = foldercreation
         self.tab_index = -1 
         self.method = method 
         self.hidden = hidden 
@@ -1110,6 +1159,30 @@ class _MiniDialog():
 
         return os.path.abspath(os.path.expandvars(os.path.expanduser(self.initial_dir)))
 
+    def _create_new_folder(self):
+        if not self.foldercreation:
+            return
+        dialog = ctk.CTkInputDialog(text='Enter new folder name:', title='New Folder')
+        name = dialog.get_input()
+        if not name:
+            return
+        name = name.strip()
+        if not name:
+            return
+        new_path = os.path.join(self.initial_dir, name)
+        try:
+            os.makedirs(new_path, exist_ok=False)
+        except FileExistsError:
+            CTkMessagebox(message='A file or folder with that name already exists!', title='Error', icon='cancel')
+            return
+        except PermissionError:
+            CTkMessagebox(message='Permission denied!', title='Error', icon='cancel')
+            return
+        except OSError as e:
+            CTkMessagebox(message=f'Could not create folder: {e}', title='Error', icon='cancel')
+            return
+        self.list_files()
+
     def _TopSide(self):
 
         self.frame = ctk.CTkFrame(self.master)
@@ -1132,6 +1205,12 @@ class _MiniDialog():
         )
 
         self.up_btn.pack(side=ctk.RIGHT, padx=10, pady=10)
+
+        if self.foldercreation:
+            self.new_folder_btn = ctk.CTkButton(
+                self.path_frame, text="＋", width=30, command=self._create_new_folder
+            )
+            self.new_folder_btn.pack(side=ctk.RIGHT, padx=(0, 10), pady=10)
         
         # Search bar
         self.search_frame = ctk.CTkFrame(self.frame)
@@ -1169,7 +1248,7 @@ class _MiniDialog():
 
             for f in os.scandir(path):
                 if (
-                    (f.is_dir() or (self.method != 'askdirectory' and f.is_file())) and
+                    (f.is_dir() or (self.method not in ('askdirectory', 'askdirectories') and f.is_file())) and
                     (self.hidden or not f.name.startswith('.')) and
                     (f.is_dir() or not self.filetypes or
                      any(f.name.endswith(ext) for ext in self.filetypes))
@@ -1287,7 +1366,7 @@ class _MiniDialog():
             style.map("Treeview",
                 background=[('selected', '#E0E0E0')],
                 foreground=[('selected', '#000000')])
-        self.tree = ttk.Treeview(self.tree_frame, show="tree", selectmode='extended' if self.method in ['askopenfilenames', 'askopenfiles'] else 'browse')
+        self.tree = ttk.Treeview(self.tree_frame, show="tree", selectmode='extended' if self.method in ['askopenfilenames', 'askopenfiles', 'askdirectories', 'askopenpathnames'] else 'browse')
         self.tree.bind("<Double-1>", self._on_click)
         self.tree.bind("<Button-1>", self._on_select_item)
         self.tree.pack(fill=tk.BOTH, expand=True, padx=5, pady=5)
@@ -1365,7 +1444,32 @@ class _MiniDialog():
                 self.master.destroy()
             return
 
-        elif self.method in ['askopenfilename', 'askopenfile', 'askdirectory']:
+        elif self.method == 'askdirectories':
+            selected_items = self.tree.selection()
+            selected_paths = [
+                self.absolute_paths[self.tree.index(item)]
+                for item in selected_items
+                if os.path.isdir(self.absolute_paths[self.tree.index(item)])
+            ]
+
+            if selected_paths:
+                self.selected_paths = selected_paths
+                self.master.destroy()
+            return
+
+        elif self.method == 'askopenpathnames':
+            selected_items = self.tree.selection()
+            selected_paths = [
+                self.absolute_paths[self.tree.index(item)]
+                for item in selected_items
+            ]
+
+            if selected_paths:
+                self.selected_paths = selected_paths
+                self.master.destroy()
+            return
+
+        elif self.method in ['askopenfilename', 'askopenfile', 'askdirectory', 'askopenpathname']:
             if not self.selected_item:
                 return
 
@@ -1375,6 +1479,11 @@ class _MiniDialog():
                 return
 
             elif self.method in ['askopenfilename', 'askopenfile'] and os.path.isfile(self.selected_item):
+                self.selected_path = self.selected_item
+                self.master.destroy()
+                return
+
+            elif self.method == 'askopenpathname':
                 self.selected_path = self.selected_item
                 self.master.destroy()
                 return

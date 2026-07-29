@@ -10,7 +10,12 @@ File dialog created in custom Tkinter and inspired by the Tkinter dialog.
 - Github: https://github.com/hmidani-abdelilah/CTkFileDialog-plus
 - License: MIT
 '''
-from ._functions import askopenfilename, askdirectory, askopenfile, askopenfiles, askopenfilenames, asksaveasfile, asksaveasfilename 
+from ._functions import (
+        askopenfilename, askdirectory, askopenfile, askopenfiles, askopenfilenames,
+        asksaveasfile, asksaveasfilename,
+        askopendirname, askopendirnames,
+        askopenpathname, askopenpathnames,
+        )
 from . import Constants
 
 __version__ = '0.3.3'
@@ -22,6 +27,10 @@ __all__ = [
         'askopenfilenames',
         'asksaveasfile',
         'asksaveasfilename', 
+        'askopendirname',
+        'askopendirnames',
+        'askopenpathname',
+        'askopenpathnames',
         'Constants'
         ]
 

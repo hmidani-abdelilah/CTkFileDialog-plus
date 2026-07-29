@@ -14,8 +14,10 @@
 - � Search/filter files in real-time
 - 🖼️ Live image preview
 - 🎥 Video thumbnail preview
-- 📁 Directory selection
-- 💾 Save file dialog (return path or open file)
+- 📁 Directory selection (single or multiple)
+- 📄📁 Combined file-or-folder selection (single or multiple)
+- ➕ Create new folders from within the dialog (`foldercreation`)
+- 💾 Save file dialog (return path or open file), with automatic extension (`defaultext`)
 - ❔ Tooltip support
 - 🖥️ Shell Path Syntax Support
 - ⌨️ Backspace using Alt + Left Arrow shortcut
@@ -154,7 +156,113 @@ app.mainloop()
 
 ---
 
-### 💾 Save As (get path only)
+### 📁 Select Single Directory (askopendirname)
+
+```python
+import customtkinter as ctk
+from CTkFileDialog import askopendirname
+
+ctk.set_appearance_mode("Dark")
+ctk.set_default_color_theme("blue")
+
+def select_directory():
+    folder = askopendirname(autocomplete=True)
+    if folder:
+        result_label.configure(text=f"Selected directory:\n{folder}")
+
+app = ctk.CTk()
+app.title("askopendirname Demo")
+app.geometry("500x200")
+
+ctk.CTkButton(app, text="Select Directory", command=select_directory).pack(pady=20)
+result_label = ctk.CTkLabel(app, text="Waiting for directory selection...")
+result_label.pack()
+
+app.mainloop()
+```
+
+---
+
+### 📁 Select Multiple Directories (askopendirnames)
+
+```python
+import customtkinter as ctk
+from CTkFileDialog import askopendirnames
+
+ctk.set_appearance_mode("Dark")
+ctk.set_default_color_theme("blue")
+
+def select_directories():
+    # Hold Ctrl or Shift while clicking to select several folders
+    folders = askopendirnames(autocomplete=True)
+    if folders:
+        result_label.configure(text="Selected directories:\n" + "\n".join(folders))
+
+app = ctk.CTk()
+app.title("askopendirnames Demo")
+app.geometry("500x300")
+
+ctk.CTkButton(app, text="Select Directories", command=select_directories).pack(pady=20)
+result_label = ctk.CTkLabel(app, text="Waiting for directory selection...", wraplength=450)
+result_label.pack()
+
+app.mainloop()
+```
+
+---
+
+### 📄📁 Select a File or a Folder (askopenpathname)
+
+```python
+import customtkinter as ctk
+from CTkFileDialog import askopenpathname
+
+ctk.set_appearance_mode("Dark")
+ctk.set_default_color_theme("blue")
+
+def select_path():
+    path = askopenpathname(autocomplete=True)
+    if path:
+        result_label.configure(text=f"Selected:\n{path}")
+
+app = ctk.CTk()
+app.title("askopenpathname Demo")
+app.geometry("500x200")
+
+ctk.CTkButton(app, text="Select File or Folder", command=select_path).pack(pady=20)
+result_label = ctk.CTkLabel(app, text="Waiting for selection...")
+result_label.pack()
+
+app.mainloop()
+```
+
+---
+
+### 📄📁 Select Multiple Files and/or Folders (askopenpathnames)
+
+```python
+import customtkinter as ctk
+from CTkFileDialog import askopenpathnames
+
+ctk.set_appearance_mode("Dark")
+ctk.set_default_color_theme("blue")
+
+def select_paths():
+    # Hold Ctrl or Shift while clicking to mix files and folders in one selection
+    items = askopenpathnames(autocomplete=True)
+    if items:
+        result_label.configure(text="Selected:\n" + "\n".join(items))
+
+app = ctk.CTk()
+app.title("askopenpathnames Demo")
+app.geometry("500x300")
+
+ctk.CTkButton(app, text="Select Files/Folders", command=select_paths).pack(pady=20)
+result_label = ctk.CTkLabel(app, text="Waiting for selection...", wraplength=450)
+result_label.pack()
+
+app.mainloop()
+```
 
 ```python
 import customtkinter as ctk
@@ -167,6 +275,9 @@ def save_as_filename():
     path = asksaveasfilename(autocomplete=True)
     if path:
         result_label.configure(text=f"Save file as:\n{path}")
+
+# You can also auto-append an extension if the user doesn't type one:
+# path = asksaveasfilename(autocomplete=True, defaultext=".txt")
 
 app = ctk.CTk()
 app.title("asksaveasfilename Demo")
@@ -284,6 +395,8 @@ app.mainloop()
 | `autocomplete`  | Enable path autocompletion with `Tab`, `Up`, and `Down`.                   |
 | `initial_dir`   | Set the initial directory when opening the dialog.                         |
 | `tool_tip`      | Enable the tool tip.                                                      |
+| `foldercreation`| Enable a "New Folder" button so the user can create folders from within the dialog (`True` by default). |
+| `defaultext`    | *(`asksaveasfilename`/`asksaveasfile` only)* Extension appended to the filename if the user didn't type one (default is none). |
 | `style`         | Defines the dialog style, by default it will be 'Default' but you can choose a small one ('Mini').                        |
 | `geometry`      | You define the geometry string in a tuple: Example ('NormalGM', 'MiniGeometry').                        |
 | `title`         | Define the title from the app, default will be "CTkFileDialog".                        |
