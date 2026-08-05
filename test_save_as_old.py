@@ -11,12 +11,9 @@ def test_save_as_default():
     print("Opening Default style save dialog...")
     file_path = CTkFileDialog.asksaveasfilename(
         style='Default',
-        preview_img=True, 
-        video_preview=True,
-        tool_tip=True,
         initial_dir=os.path.expanduser('~'),
         title='Save File (Default Style)',
-        geometry=('1120x620', '500x400')
+        geometry=('1320x720', '500x400')
     )
     if file_path:
         print(f"✓ Selected path (Default): {file_path}")
@@ -44,20 +41,19 @@ def test_save_as_mini():
 def test_save_as_file_default():
     """Test asksaveasfile with Default style"""
     print("Opening asksaveasfile dialog (Default)...")
-    file_obj = CTkFileDialog.asksaveasfile(
+    with CTkFileDialog.asksaveasfile(
         style='Default',
         initial_dir=os.path.expanduser('~'),
         title='Save File with Open (Default)',
         geometry=('1320x720', '500x400')
-    )
-    if file_obj is None:
-        print("✗ No file selected for writing (Default)")
-        return False
-
-    with file_obj as f:
-        print(f"✓ File opened for writing: {f.name}")
-        f.write("Test content\n")
-        return True
+    ) as f:
+        if f:
+            print(f"✓ File opened for writing: {f.name}")
+            f.write("Test content\n")
+            return True
+        else:
+            print("✗ No file selected for writing (Default)")
+            return False
 
 def main():
     ctk.set_appearance_mode("Dark")

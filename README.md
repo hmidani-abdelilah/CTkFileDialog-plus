@@ -30,31 +30,80 @@
 ## 📦 Installation
 
 ```bash
-
-# Using bash 
+# Using bash
 git clone https://github.com/hmidani-abdelilah/CTkFileDialog-plus
 cd CTkFileDialog-plus
 python3 -m venv .venv
 source .venv/bin/activate
 pip3 install -r requirements.txt
 
-# On Windows 
-git clone https://github.com/hmidani-abdelilah/CTkFileDialog-plus 
+# On Windows
+git clone https://github.com/hmidani-abdelilah/CTkFileDialog-plus
 cd CTkFileDialog-plus
-python3 -m venv .venv 
-.\.venv\Scripts\activate.ps1 # In Powershell
-pip3 install -r requirements.txt 
+python3 -m venv .venv
+.\.venv\Scripts\activate.ps1  # In PowerShell
+pip3 install -r requirements.txt
 
-# Or ussing pip 
-
-python3 -m venv .venv 
-source .venv/bin/activate # In powershell -> .\.venv\Scripts\activate.ps1
+# Or using pip
+python3 -m venv .venv
+source .venv/bin/activate  # On PowerShell use .\.venv\Scripts\activate.ps1
 pip3 install CTkFileDialog-plus
 
 ```
 
 > [!WARNING]
 > You should install the [Hack Nerd Fonts](https://github.com/ryanoasis/nerd-fonts/releases/download/v3.2.1/Hack.zip) if u wanna see the icons without problems :) 
+
+---
+
+## 📁 Project structure
+
+```text
+CTkFileDialog-plus/
+├── LICENSE                         # project license terms
+├── README.md                       # user and developer documentation
+├── requirements.txt                # Python dependencies
+├── test.py                         # general package usage example
+├── test_save_as.py                 # save-as dialog regression/test example
+├── CTkFileDialog/                  # package source code
+│   ├── __init__.py                 # public package API
+│   ├── _functions.py               # dialog helper functions exposed to users
+│   ├── _system.py                  # cross-platform path handling support
+│   ├── Dialog.py                   # dialog imports and public component exports
+│   ├── Constants/                  # reusable package constants
+│   │   ├── __init__.py
+│   │   └── constants.py
+│   ├── core/                       # core filesystem/search/sorting logic
+│   │   ├── __init__.py
+│   │   ├── filesystem.py
+│   │   ├── search.py
+│   │   └── sorting.py
+│   ├── icons/                      # icon assets for the dialogs
+│   │   ├── _IconsMini/
+│   │   └── *.png
+│   ├── preview/                    # image/video preview helpers
+│   │   ├── __init__.py
+│   │   └── media.py
+│   ├── resources/                  # shared resource loading utilities
+│   │   ├── __init__.py
+│   │   └── icons.py
+│   ├── system/                     # platform-specific system utilities
+│   │   ├── __init__.py
+│   │   └── platform.py
+│   ├── ui/                         # dialog UI implementations and widgets
+│   │   ├── __init__.py
+│   │   ├── default_dialog.py
+│   │   ├── mini_dialog.py
+│   │   └── tooltip.py
+│   └── utils/                      # small helper utilities
+│       ├── __init__.py
+│       └── helpers.py
+├── Images/                         # README screenshots showing light and dark themes
+│   ├── MiniDialogDark.png
+│   ├── MiniDialogLight.png
+│   ├── NormalDialogDark.png
+│   └── NormalDialogLight.png
+```
 
 ---
 
@@ -308,6 +357,11 @@ def save_as_file():
         file.close()
         result_label.configure(text=f"File saved:\n{file.name}")
 
+# Alternatively, asksaveasfile supports the context manager protocol:
+# with asksaveasfile(autocomplete=True) as file:
+#     if file:
+#         file.write("This file was created using the demo.")
+
 app = ctk.CTk()
 app.title("asksaveasfile Demo")
 app.geometry("500x200")
@@ -398,8 +452,8 @@ app.mainloop()
 | `foldercreation`| Enable a "New Folder" button so the user can create folders from within the dialog (`True` by default). |
 | `defaultext`    | *(`asksaveasfilename`/`asksaveasfile` only)* Extension appended to the filename if the user didn't type one (default is none). |
 | `style`         | Defines the dialog style, by default it will be 'Default' but you can choose a small one ('Mini').                        |
-| `geometry`      | You define the geometry string in a tuple: Example ('NormalGM', 'MiniGeometry').                        |
-| `title`         | Define the title from the app, default will be "CTkFileDialog".                        |
+| `geometry`      | Defines the dialog size. For functions that support both styles, pass a tuple `(default_geometry, mini_geometry)`.                        |
+| `title`         | Define the title for the dialog window. Defaults to `CTkFileDialog`.                        |
 
 
 </div>
