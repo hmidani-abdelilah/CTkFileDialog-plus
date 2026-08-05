@@ -458,22 +458,6 @@ app.mainloop()
 
 </div>
 
----
-
-## 🌙 Dark Mode Preview
-
-<p align="center">
-  <img src="https://raw.githubusercontent.com/hmidani-abdelilah/CTkFileDialog-plus/refs/heads/main/Images/NormalDialogDark.png" width="80%">
-</p>
-
-## ☀️ Light Mode Preview
-
-<p align="center">
-  <img src="https://raw.githubusercontent.com/hmidani-abdelilah/CTkFileDialog-plus/refs/heads/main/Images/NormalDialogLight.png" width="80%">
-</p>
-
----
-
 ## 🎯 Using New Features
 
 ### 🔎 Search/Filter Files
@@ -544,22 +528,18 @@ root.mainloop()
 
 </div>
 
---- 
-
-## Mini Dialog 
-
-This is a parameter of the file dialog, but it's more powerful than the default one. As I mentioned earlier, it doesn't support parameters like tooltip, preview_img, or video_preview.
+---
 
 ## 🌙 Dark Mode Preview
 
 <p align="center">
-  <img src="https://raw.githubusercontent.com/hmidani-abdelilah/CTkFileDialog-plus/refs/heads/main/Images/MiniDialogDark.png" width="80%">
+  <img src="https://raw.githubusercontent.com/hmidani-abdelilah/CTkFileDialog-plus/refs/heads/main/Images/NormalDialogDark.png" width="80%">
 </p>
 
 ## ☀️ Light Mode Preview
 
 <p align="center">
-  <img src="https://raw.githubusercontent.com/hmidani-abdelilah/CTkFileDialog-plus/refs/heads/main/Images/MiniDialogLight.png" width="80%">
+  <img src="https://raw.githubusercontent.com/hmidani-abdelilah/CTkFileDialog-plus/refs/heads/main/Images/NormalDialogLight.png" width="80%">
 </p>
 
-The mini design  created by [user](https://github.com/limafresh), and the default design created by [user](https://github.com/SelfDreamer) and all credit goes to them. I also want to thank them for creating that design in advance.
+---
