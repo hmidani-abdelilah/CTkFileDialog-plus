@@ -543,3 +543,16 @@ root.mainloop()
 </p>
 
 ---
+
+
+## 🌙 Dark Mode Mini
+
+<p align="center">
+  <img src="https://raw.githubusercontent.com/hmidani-abdelilah/CTkFileDialog-plus/refs/heads/main/Images/MiniDialogDark.png" width="80%">
+</p>
+
+## ☀️ Light Mode Mini
+
+<p align="center">
+  <img src="https://raw.githubusercontent.com/hmidani-abdelilah/CTkFileDialog-plus/refs/heads/main/Images/MiniDialogLight.png" width="80%">
+</p>
