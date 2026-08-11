@@ -556,3 +556,9 @@ root.mainloop()
 <p align="center">
   <img src="https://raw.githubusercontent.com/hmidani-abdelilah/CTkFileDialog-plus/refs/heads/main/Images/MiniDialogLight.png" width="80%">
 </p>
+
+---
+
+The mini design wasn't made by me; it was made by this [user](https://github.com/limafresh). Additionally, I did not design the normal interface; it was developed by this [user](https://github.com/yoodreamer/CTkFileDialog), and they deserve all the credit. I would like to express my gratitude to them for developing that design beforehand.I revamped the interface, established a new framework, and incorporated additional features.
+
+---
