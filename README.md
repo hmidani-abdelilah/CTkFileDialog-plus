@@ -530,7 +530,7 @@ root.mainloop()
 
 ---
 
-## 🌙 Dark Mode Preview
+## 🌙 Dark Mode Normal
 
 <p align="center">
   <img src="https://raw.githubusercontent.com/hmidani-abdelilah/CTkFileDialog-plus/refs/heads/main/Images/NormalDialogDark.png" width="80%">
